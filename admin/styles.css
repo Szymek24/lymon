@@ -1,0 +1,22 @@
+body {
+    font-family: sans-serif;
+    background: #f7f7f7;
+    margin: 0;
+    padding: 20px;
+}
+form {
+    margin: 10px 0;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+}
+input, textarea, select {
+    display: block;
+    width: 100%;
+    margin: 6px 0;
+    padding: 6px;
+}
+button {
+    padding: 6px 12px;
+    margin-top: 10px;
+}

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lymon Szipkowski</title>
+<meta name="color-scheme" content="light dark">
+<style>
+:root{
+  --bg:#ffffff; --fg:#111111; --muted:#6b6b6b; --link:#0b3ea8;
+  --soft:#f3f3f3; --border:#dcdcdc; --max:860px; --pad:18px;
+  --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  --serif: Georgia, "Times New Roman", serif;
+  --tetraWidth: 42ch;
+}
+:root[data-theme="dark"]{
+  --bg:#0c0c0c; --fg:#efefef; --muted:#a5a5a5; --link:#90a8ff;
+  --soft:#161616; --border:#2a2a2a;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0; background:var(--bg); color:var(--fg); font:16px/1.65 var(--sans)}
+a{color:var(--link); text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:var(--max); margin:0 auto; padding:0 var(--pad)}
+hr{border:0; border-top:1px solid var(--border); margin:20px 0}
+
+header{border-bottom:1px solid var(--border); background:var(--bg); position:sticky; top:0; z-index:5}
+.header-inner{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0}
+.brand a{font-family:var(--serif); font-weight:700; font-size:clamp(24px,5.5vw,36px); letter-spacing:.2px; color:var(--fg)}
+nav a{margin-left:10px}
+button.icon-btn, #themeToggle, .btn-ghost{margin-left:10px; border:1px solid var(--border); background:transparent; color:var(--fg); padding:6px 10px; cursor:pointer; font-size:14px}
+#themeToggle:focus, .btn-ghost:focus{outline:2px solid var(--link); outline-offset:2px}
+
+.hero{min-height:calc(100vh - 64px); display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center}
+.hero h1{font-family:var(--serif); font-size:clamp(36px,8vw,64px); margin:0 0 18px}
+.home-actions{display:flex; flex-direction:column; align-items:center; gap:16px}
+.home-wiersze{font-family:var(--serif); font-weight:700; font-size:clamp(28px,6.5vw,44px)}
+.icon-btn{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:50%}
+.icon{width:20px;height:20px}
+
+.controls{display:flex; flex-wrap:wrap; gap:10px; margin:8px 0 14px}
+input[type="search"], select{border:1px solid var(--border); background:var(--bg); color:var(--fg); padding:8px 10px; font-size:15px}
+.item{padding:12px 0; border-bottom:1px solid var(--border)}
+.item:last-child{border-bottom:0}
+.item-title{font-family:var(--serif); font-weight:700; font-size:clamp(18px,3.8vw,22px); line-height:1.3; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.item-date{color:var(--muted); font-size:13px; margin-top:4px}
+.item-stats{color:var(--muted); font-size:12px; margin-top:4px}
+.link-plain{color:inherit}
+.eye{width:18px;height:18px;display:inline-block;vertical-align:middle}
+.backlink{display:inline-flex; align-items:center; gap:6px}
+
+/* Tagi */
+.tags{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0}
+.tag{background:var(--soft); border:1px solid var(--border); padding:4px 10px; border-radius:16px; font-size:13px; cursor:pointer; transition:all .2s}
+.tag:hover{background:var(--border); transform:translateY(-1px)}
+.tag-filter{background:#d4edda; border-color:#28a745; font-weight:bold}
+
+/* Kalendarz */
+.calendar-wrap{margin:20px 0}
+.calendar-nav{display:flex; gap:10px; align-items:center; margin:10px 0}
+.calendar{display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; margin:10px 0}
+.cal-header{font-weight:bold; padding:8px; text-align:center; font-size:12px; color:var(--muted)}
+.cal-day{aspect-ratio:1; background:var(--soft); border:1px solid var(--border); display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:12px; cursor:pointer; transition:all .2s; position:relative}
+.cal-day:hover{background:var(--border)}
+.cal-day.has-poems{background:#d4edda; border-color:#28a745; font-weight:bold}
+.cal-day.has-poems:hover{background:#c3e6cb}
+.cal-count{font-size:10px; color:var(--muted); margin-top:2px}
+
+.poem{white-space:pre-wrap; font-family:var(--serif); font-size:1.06rem; line-height:1.8; max-width:65ch}
+.poem .stanza{display:block; margin:0 0 1.2em}
+
+#readingRoot.reading-on h2{font-size:clamp(22px,4.4vw,30px)}
+#readingRoot.reading-on .poem{font-size:1.24rem; line-height:2.0; max-width:58ch}
+
+.grid{display:grid; gap:12px}
+.grid.slamy{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.slam-tile{border:1px solid var(--border); background:var(--soft); aspect-ratio:1/1; position:relative; padding:10px; text-decoration:none; color:inherit}
+.slam-tile:hover{outline:1px solid var(--fg)}
+.slam-title{position:absolute; top:8px; left:10px; font-weight:700; font-family:var(--serif)}
+.slam-date{position:absolute; bottom:8px; right:10px; font-size:12px; color:var(--muted)}
+
+.tetra-wrap{display:flex; flex-direction:column; align-items:center}
+.tetra-controls{align-self:stretch}
+.tetra-list{display:flex; flex-direction:column; gap:12px; width:100%}
+.tetra-tile{position:relative; border:1px solid var(--border); background:var(--soft); width:min(100%, var(--tetraWidth)); aspect-ratio:1/1; padding:26px 10px 10px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start}
+.tetra-date{position:absolute; top:6px; left:10px; font-size:12px; color:var(--muted)}
+.tetra-body{font-family:var(--serif); white-space:pre; font-size:0.98rem; overflow:hidden; overflow-wrap:anywhere}
+
+.modal-backdrop{position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:50}
+.modal{width:min(720px, calc(100% - 28px)); max-height:84vh; overflow:auto; background:var(--bg); color:var(--fg); border:1px solid var(--border); padding:14px}
+.modal header{display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:10px}
+.modal h3{margin:0; font-family:var(--serif)}
+.modal .x{border:1px solid var(--border); background:transparent; padding:4px 8px; cursor:pointer}
+
+.reading-controls{display:flex; gap:8px; margin:8px 0}
+
+@media (max-width:480px){
+  .item-title{gap:6px}
+}
+@media (prefers-reduced-motion: reduce){
+  *{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container header-inner">
+    <div class="brand"><a href="#/">Lymon Szipkowski</a></div>
+    <nav>
+      <a href="#/wiersze">Wiersze</a>
+      <a href="#/kalendarz">Kalendarz</a>
+      <button id="themeToggle" aria-label="Przełącz motyw" title="Przełącz motyw">🌓</button>
+    </nav>
+  </div>
+</header>
+
+<main class="container" id="app" tabindex="-1" aria-live="polite"></main>
+
+<div class="modal-backdrop" id="modalBackdrop" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalBody">
+  <div class="modal" role="document">
+    <header>
+      <h3 id="modalTitle">Podgląd</h3>
+      <button class="x" id="modalClose" aria-label="Zamknij">X</button>
+    </header>
+    <div class="poem" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+let data = { poems: [], slams: [], tetrastychs: [], tags: [] };
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const bySlug = (arr, slug) => arr.find(x => x.slug === slug);
+const byId = (arr, id) => arr.find(x => x.id === id);
+const fmtDate = iso => new Date(iso).toLocaleDateString("pl-PL",{year:"numeric",month:"2-digit",day:"2-digit"});
+const esc = s => s.replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
+const debounce = (fn, ms=200)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; };
+function setTitle(t){ document.title = t ? `${t} – Lymon Szipkowski` : "Lymon Szipkowski"; }
+function scrollTop(){ window.scrollTo({top:0, behavior:"instant"}); }
+
+(function initTheme(){
+  const saved = localStorage.getItem("theme");
+  const sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', saved || (sysDark?"dark":"light"));
+  $("#themeToggle").addEventListener("click", ()=>{
+    const cur = document.documentElement.getAttribute('data-theme');
+    const next = cur==="dark"?"light":"dark";
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem("theme", next);
+  });
+})();
+
+let currentHash = location.hash || "#/";
+let prevHash = "";
+window.addEventListener("hashchange", ()=>{
+  prevHash = currentHash;
+  currentHash = location.hash || "#/";
+  sessionStorage.setItem("prevHash", prevHash);
+});
+
+const modal = (() => {
+  const backdrop = $("#modalBackdrop");
+  const closeBtn = $("#modalClose");
+  const titleEl = $("#modalTitle");
+  const bodyEl = $("#modalBody");
+  let lastFocus = null;
+  function open({title, body}){
+    titleEl.textContent = title || "Podgląd";
+    bodyEl.textContent = body || "";
+    lastFocus = document.activeElement;
+    backdrop.style.display = "flex";
+    closeBtn.focus();
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("focus", trap, true);
+  }
+  function close(){
+    backdrop.style.display = "none";
+    document.removeEventListener("keydown", onKey);
+    document.removeEventListener("focus", trap, true);
+    if(lastFocus) lastFocus.focus();
+  }
+  function onKey(e){
+    if(backdrop.style.display!=="flex") return;
+    if(e.key==="Escape") close();
+    if(e.key==="Tab"){
+      const focusables = backdrop.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const f = Array.from(focusables);
+      if(!f.length) return;
+      const i = f.indexOf(document.activeElement);
+      if(e.shiftKey && i===0){ f[f.length-1].focus(); e.preventDefault(); }
+      else if(!e.shiftKey && i===f.length-1){ f[0].focus(); e.preventDefault(); }
+    }
+  }
+  function trap(e){
+    if(backdrop.style.display!=="flex") return;
+    if(!backdrop.contains(e.target)){ e.stopPropagation(); closeBtn.focus(); }
+  }
+  closeBtn.addEventListener("click", close);
+  backdrop.addEventListener("click", (e)=>{ if(e.target === backdrop) close(); });
+  return {open, close};
+})();
+
+// Śledzenie wyświetleń
+async function trackView(poemId) {
+  try {
+    await fetch('/api/track_view.php', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({poem_id: poemId})
+    });
+  } catch(e) { console.warn('Tracking failed', e); }
+}
+
+const views = {
+  home(){
+    setTitle("");
+    return `
+      <section class="hero">
+        <h1>Lymon Szipkowski</h1>
+        <h4>Mój twórczy pamiętnik<br><font-size  <span style="font-size: 70%;">w powijakach</span></h4></h4>
+        <div class="home-actions">
+          <a class="icon-btn" href="https://www.instagram.com/lymonsz/" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg class="icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm5 3.5A5.5 5.5 0 1 1 6.5 13 5.5 5.5 0 0 1 12 7.5Zm0 2A3.5 3.5 0 1 0 15.5 13 3.5 3.5 0 0 0 12 9.5Zm6.25-3a1.25 1.25 0 1 1-1.25 1.25A1.25 1.25 0 0 1 18.25 6.5Z"/></svg>
+          </a>
+          <a class="home-wiersze" href="#/wiersze">Wiersze</a>
+        </div>
+      </section>
+    `;
+  },
+
+  wiersze(){
+    setTitle("Wiersze");
+    const sortOptions = `
+      <option value="az">A–Z</option>
+      <option value="za">Z–A</option>
+      <option value="new">Najnowsze</option>
+      <option value="old">Najstarsze</option>
+      <option value="popular">Najpopularniejsze</option>
+    `;
+    return `
+      <h2>Wiersze</h2>
+      <p style="margin:.3rem 0 1rem 0; color:var(--muted); font-size:14px">
+        <a href="#/slamy">Slamy</a> · <a href="#/tetrastych">Tetrastych dzienny</a> · <a href="#/kalendarz">Kalendarz</a>
+      </p>
+      <div id="tagCloud" class="tags"></div>
+      <div class="controls">
+        <input type="search" id="q" placeholder="Szukaj w tytule i treści…" aria-label="Szukaj">
+        <select id="sort" aria-label="Sortowanie">${sortOptions}</select>
+        <button class="btn-ghost" id="randomPoem" aria-label="Losowy wiersz" title="Losowy wiersz">🎲</button>
+      </div>
+      <div id="poemList"></div>
+    `;
+  },
+
+  poemDetail(slug){
+    const p = bySlug(data.poems, slug);
+    if(!p){ setTitle("Nie znaleziono"); return `<p>Nie znaleziono wiersza.</p>`; }
+    setTitle(p.title);
+    
+    trackView(p.id);
+    
+    const sortedByTitle = [...data.poems].sort((a,b)=> a.title.localeCompare(b.title,"pl"));
+    const idx = sortedByTitle.findIndex(x=>x.slug===slug);
+    const prev = sortedByTitle[idx-1], next = sortedByTitle[idx+1];
+    const readOn = localStorage.getItem("readingMode")==="on";
+    
+    const tagsHtml = p.tags && p.tags.length > 0 ? 
+      `<div class="tags">${p.tags.map(t => `<a href="#/wiersze?tag=${t.slug}" class="tag">#${esc(t.name)}</a>`).join('')}</div>` : '';
+    
+    return `
+      <a href="#/wiersze" class="backlink" data-smart-back title="Wróć">← Wróć</a>
+      <div id="readingRoot" class="${readOn ? 'reading-on' : ''}">
+        <div class="reading-controls">
+          <button class="btn-ghost" id="toggleReading" aria-pressed="${readOn}" aria-label="Tryb czytania" title="Tryb czytania (Aa)">Aa</button>
+          <button class="btn-ghost" id="copyPoem" aria-label="Kopiuj treść" title="Kopiuj treść">📋</button>
+          <button class="btn-ghost" id="copyLink" aria-label="Kopiuj link" title="Kopiuj link">🔗</button>
+          ${prev?`<a class="btn-ghost" href="#/wiersz/${prev.slug}" title="Poprzedni (J/←)">←</a>`:""}
+          ${next?`<a class="btn-ghost" href="#/wiersz/${next.slug}" title="Następny (K/→)">→</a>`:""}
+        </div>
+        <h2 style="font-family:var(--serif)">${esc(p.title)}</h2>
+        <div class="item-date">${fmtDate(p.created_at)}</div>
+        <div class="item-stats">👁️ ${p.view_count || 0} wyświetleń</div>
+        ${tagsHtml}
+        <hr>
+        <div class="poem" id="poemText">${esc(p.body)}</div>
+      </div>
+    `;
+  },
+
+  slamy(){
+    setTitle("Slamy");
+    return `
+      <a href="#/wiersze" class="backlink">← Wiersze</a>
+      <h2>Slamy</h2>
+      <div class="grid slamy">
+        ${data.slams.map(s => `
+          <a class="slam-tile" href="#/slam/${s.slug}">
+            <div class="slam-title">${esc(s.title)}</div>
+            <div class="slam-date">${fmtDate(s.happened_on)}</div>
+          </a>
+        `).join("")}
+      </div>
+    `;
+  },
+
+  slamDetail(slug){
+    const s = bySlug(data.slams, slug);
+    if(!s){ setTitle("Nie znaleziono"); return `<p>Nie znaleziono slamu.</p>`; }
+    setTitle(`Slam: ${s.title}`);
+    const poems = (s.poems || []);
+    return `
+      <a href="#/slamy" class="backlink">← Slamy</a>
+      <h2 style="font-family:var(--serif)">${esc(s.title)} <span style="color:var(--muted); font-size:14px">(${fmtDate(s.happened_on)})</span></h2>
+      ${poems.map(p => `
+        <div class="item">
+          <div class="item-title">
+            <a class="link-plain" href="#/wiersz/${p.slug}">${esc(p.title)}</a>
+            <button class="preview" data-preview="${p.slug}" title="Podgląd" aria-label="Podgląd">
+              <svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="item-date">${fmtDate(p.created_at)}</div>
+        </div>
+      `).join("")}
+    `;
+  },
+
+  tetrastych(){
+    setTitle("Tetrastych dzienny");
+    const all = [...data.tetrastychs].sort((a,b)=> b.published_on.localeCompare(a.published_on));
+    const longest = all.reduce((m,t)=> Math.max(m, ...t.body.split("\n").map(line=>line.length)), 0) || 42;
+    document.documentElement.style.setProperty("--tetraWidth", Math.min(Math.max(longest, 16), 70) + "ch");
+    return `
+      <a href="#/wiersze" class="backlink">← Wiersze</a>
+      <h2>Tetrastych dzienny</h2>
+      <div class="tetra-wrap">
+        <div class="controls tetra-controls">
+          <input type="search" id="tq" placeholder="Szukaj w treści…" aria-label="Szukaj w treści">
+        </div>
+        <div class="tetra-list" id="tetraList" aria-live="polite"></div>
+        <div id="tetraSentinel" style="height:24px"></div>
+      </div>
+    `;
+  },
+
+  kalendarz(){
+    setTitle("Kalendarz publikacji");
+    return `
+      <a href="#/wiersze" class="backlink">← Wiersze</a>
+      <h2>📅 Kalendarz publikacji</h2>
+      <div class="calendar-wrap">
+        <div class="calendar-nav">
+          <button class="btn-ghost" onclick="changeMonth(-1)">← Poprzedni</button>
+          <span id="currentMonth" style="font-weight:bold;"></span>
+          <button class="btn-ghost" onclick="changeMonth(1)">Następny →</button>
+        </div>
+        <div id="calendarGrid"></div>
+      </div>
+    `;
+  }
+};
+
+function router(){
+  const app = $("#app");
+  const hash = location.hash || "#/";
+  const [_, route, slug] = hash.split("/");
+  
+  // Parse query params
+  const params = new URLSearchParams(hash.includes('?') ? hash.split('?')[1] : '');
+  window.currentTagFilter = params.get('tag');
+  
+  let html = "";
+  switch(route.split('?')[0]){
+    case undefined:
+    case "":
+    case "#":
+      html = views.home(); break;
+    case "wiersze":
+      html = views.wiersze(); break;
+    case "wiersz":
+      html = views.poemDetail(slug); break;
+    case "slamy":
+      html = views.slamy(); break;
+    case "slam":
+      html = views.slamDetail(slug); break;
+    case "tetrastych":
+      html = views.tetrastych(); break;
+    case "kalendarz":
+      html = views.kalendarz(); break;
+    default:
+      setTitle("Nie znaleziono");
+      html = `<p>Nie znaleziono strony.</p>`;
+  }
+  app.innerHTML = html;
+  app.focus();
+  scrollTop();
+  afterRender(route.split('?')[0]);
+}
+
+window.addEventListener("hashchange", router);
+window.addEventListener("load", ()=>{ router(); });
+
+(async function hydrateFromApi(){
+  try {
+    const [poemsRes, slamsRes, tetraRes, tagsRes] = await Promise.all([
+      fetch('/api/poems.php', {cache:'no-store'}),
+      fetch('/api/slams.php', {cache:'no-store'}),
+      fetch('/api/tetrastych.php', {cache:'no-store'}),
+      fetch('/api/tags.php', {cache:'no-store'})
+    ]);
+
+    if (poemsRes.ok && slamsRes.ok && tetraRes.ok) {
+      const [poemsJson, slamsJson, tetraJson, tagsJson] = await Promise.all([
+        poemsRes.json(), slamsRes.json(), tetraRes.json(), tagsRes.json()
+      ]);
+
+      data.poems = (poemsJson || []).map(p => ({
+        id: Number(p.id),
+        slug: p.slug,
+        title: p.title,
+        body: p.body || "",
+        created_at: p.created_at,
+        tags: p.tags || [],
+        view_count: p.view_count || 0
+      }));
+
+      data.slams = (slamsJson || []).map(s => ({
+        id: Number(s.id),
+        slug: s.slug,
+        title: s.title,
+        happened_on: s.happened_on,
+        poems: s.poems || []
+      }));
+
+      data.tetrastychs = (tetraJson || []).map(t => ({
+        id: Number(t.id),
+        published_on: t.published_on,
+        body: t.body || ""
+      }));
+
+      data.tags = (tagsJson || []).map(t => ({
+        id: Number(t.id),
+        name: t.name,
+        slug: t.slug,
+        poem_count: Number(t.poem_count || 0)
+      }));
+
+      router();
+      console.log('Dane z API załadowane.');
+    }
+  } catch (e) {
+    console.warn('Nie udało się pobrać danych z API', e);
+  }
+})();
+
+function afterRender(route){
+  $("#app").addEventListener("click", (e)=>{
+    const btn = e.target.closest("button.preview");
+    if(!btn) return;
+    const slug = btn.getAttribute("data-preview");
+    const p = bySlug(data.poems, slug); if(!p) return;
+    modal.open({title:p.title, body:p.body});
+  });
+
+  const smartBack = $("[data-smart-back]");
+  if(smartBack){
+    smartBack.addEventListener("click", (e)=>{
+      e.preventDefault();
+      const prev = sessionStorage.getItem("prevHash");
+      if(prev && (prev.startsWith("#/slam/") || prev.startsWith("#/wiersze"))) location.hash = prev;
+      else if(history.length>1) history.back();
+      else location.hash = "#/wiersze";
+    });
+  }
+
+  if(route==="wiersze"){ initPoemList(); }
+  if(route==="wiersz"){ initPoemDetailNav(); }
+  if(route==="tetrastych"){ initTetra(); }
+  if(route==="kalendarz"){ initKalendarz(); }
+}
+
+function initPoemList(){
+  renderTagCloud();
+  
+  const box = document.createElement("div");
+  $("#poemList").replaceWith(box); box.id = "poemList";
+  const q = $("#q"); const sort = $("#sort");
+
+  function highlight(hay, needle){
+    if(!needle) return esc(hay);
+    const re = new RegExp(`(${needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`,"ig");
+    return esc(hay).replace(re, "<mark>$1</mark>");
+  }
+
+  function render(){
+    const query = (q.value||"").trim();
+    let items = data.poems.filter(p => {
+      const matchesQuery = (p.title+" "+p.body).toLowerCase().includes(query.toLowerCase());
+      const matchesTag = !window.currentTagFilter || 
+                        (p.tags && p.tags.some(t => t.slug === window.currentTagFilter));
+      return matchesQuery && matchesTag;
+    });
+    
+    const byTitle = (a,b)=> a.title.localeCompare(b.title,"pl");
+    const byNew = (a,b)=> new Date(b.created_at) - new Date(a.created_at);
+    const byOld = (a,b)=> new Date(a.created_at) - new Date(b.created_at);
+    const byPopular = (a,b)=> (b.view_count || 0) - (a.view_count || 0);
+    
+    switch(sort.value){
+      case "az": items.sort(byTitle); break;
+      case "za": items.sort((a,b)=> byTitle(b,a)); break;
+      case "new": items.sort(byNew); break;
+      case "old": items.sort(byOld); break;
+      case "popular": items.sort(byPopular); break;
+    }
+    
+    box.innerHTML = items.map(p => {
+      const tagsHtml = p.tags && p.tags.length > 0 ? 
+        `<div class="tags">${p.tags.map(t => `<a href="#/wiersze?tag=${t.slug}" class="tag">#${esc(t.name)}</a>`).join('')}</div>` : '';
+      
+      return `
+        <div class="item">
+          <div class="item-title">
+            <a class="link-plain" href="#/wiersz/${p.slug}">${highlight(p.title, query)}</a>
+            <button class="preview" data-preview="${p.slug}" title="Podgląd" aria-label="Podgląd">
+              <svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <div class="item-date">${fmtDate(p.created_at)}</div>
+          <div class="item-stats">👁️ ${p.view_count || 0} wyświetleń</div>
+          ${tagsHtml}
+        </div>
+      `;
+    }).join("");
+  }
+  
+  q.addEventListener("input", debounce(render, 120));
+  sort.addEventListener("change", render);
+  $("#randomPoem").addEventListener("click", ()=>{
+    const items = data.poems;
+    const r = items[Math.floor(Math.random()*items.length)];
+    location.hash = `#/wiersz/${r.slug}`;
+  });
+  render();
+}
+
+function renderTagCloud(){
+  const cloud = $("#tagCloud");
+  if(!cloud) return;
+  
+  if(data.tags.length === 0){
+    cloud.innerHTML = '<p style="color:var(--muted); font-size:14px">Brak tagów</p>';
+    return;
+  }
+  
+  cloud.innerHTML = data.tags
+    .filter(t => t.poem_count > 0)
+    .map(t => {
+      const isActive = window.currentTagFilter === t.slug;
+      const cls = isActive ? 'tag tag-filter' : 'tag';
+      const href = isActive ? '#/wiersze' : `#/wiersze?tag=${t.slug}`;
+      return `<a href="${href}" class="${cls}">#${esc(t.name)} (${t.poem_count})</a>`;
+    }).join('');
+}
+
+function initPoemDetailNav(){
+  const root = document.getElementById("readingRoot");
+  const toggle = document.getElementById("toggleReading");
+  if(toggle && root){
+    toggle.addEventListener("click", ()=>{
+      const on = !root.classList.contains("reading-on");
+      root.classList.toggle("reading-on", on);
+      toggle.setAttribute("aria-pressed", on ? "true":"false");
+      localStorage.setItem("readingMode", on ? "on":"off");
+    });
+  }
+
+  const copyBtn = $("#copyPoem");
+  copyBtn?.addEventListener("click", async ()=>{
+    try{
+      const text = $("#poemText")?.textContent || "";
+      await navigator.clipboard.writeText(text);
+      copyBtn.textContent = "✓";
+      setTimeout(()=>copyBtn.textContent="📋", 1000);
+    }catch(e){}
+  });
+
+  const copyLink = $("#copyLink");
+  copyLink?.addEventListener("click", async ()=>{
+    try { await navigator.clipboard.writeText(location.href); copyLink.textContent="✓"; setTimeout(()=>copyLink.textContent="🔗",1000); } catch(e){}
+  });
+
+  const keyHandler = (e)=>{
+    const links = $(".reading-controls a.btn-ghost");
+    if(e.key==="ArrowLeft" || e.key.toLowerCase()==="j"){ links[0]?.click(); }
+    if(e.key==="ArrowRight" || e.key.toLowerCase()==="k"){ links[1]?.click(); }
+  };
+  window.addEventListener("keydown", keyHandler, { once:false });
+}
+
+function initTetra(){
+  const input = $("#tq");
+  const list = $("#tetraList");
+  const sentinel = $("#tetraSentinel");
+  let master = [...data.tetrastychs].sort((a,b)=> b.published_on.localeCompare(a.published_on));
+  const longest = master.reduce((m,t)=> Math.max(m, ...t.body.split("\n").map(line=>line.length)), 0) || 42;
+  document.documentElement.style.setProperty("--tetraWidth", Math.min(Math.max(longest, 16), 70) + "ch");
+
+  let filtered = master;
+  let rendered = 0;
+  const CHUNK = 60;
+
+  function renderMore(){
+    const slice = filtered.slice(rendered, rendered + CHUNK);
+    if(slice.length===0) return;
+    const frag = document.createDocumentFragment();
+    slice.forEach(t=>{
+      const tile = document.createElement("div");
+      tile.className="tetra-tile";
+      tile.setAttribute("data-body", t.body.toLowerCase());
+      tile.innerHTML = `
+        <div class="tetra-date">${fmtDate(t.published_on)}</div>
+        <div class="tetra-body">${esc(t.body)}</div>`;
+      frag.appendChild(tile);
+    });
+    list.appendChild(frag);
+    rendered += slice.length;
+  }
+
+  function resetAndRender(){
+    list.innerHTML = ""; rendered = 0;
+    renderMore();
+  }
+
+  const onSearch = debounce(()=>{
+    const q = (input.value||"").toLowerCase().trim();
+    filtered = q ? master.filter(t=> t.body.toLowerCase().includes(q)) : master;
+    resetAndRender();
+  }, 200);
+
+  input.addEventListener("input", onSearch);
+  resetAndRender();
+
+  const ob = new IntersectionObserver((entries)=>{
+    if(entries.some(e=> e.isIntersecting)) renderMore();
+  }, {rootMargin:"400px"});
+  ob.observe(sentinel);
+}
+
+// Kalendarz
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+
+window.changeMonth = function(delta) {
+  currentMonth += delta;
+  if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  loadCalendar();
+}
+
+async function loadCalendar() {
+  const monthNames = ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec',
+                      'Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+  
+  const monthEl = document.getElementById('currentMonth');
+  if(monthEl) {
+    monthEl.textContent = monthNames[currentMonth] + ' ' + currentYear;
+  }
+  
+  try {
+    const response = await fetch(`/api/stats.php?type=calendar&year=${currentYear}&month=${currentMonth + 1}`);
+    const data = await response.json();
+    renderCalendar(data.days);
+  } catch(e) {
+    console.error('Błąd ładowania kalendarza', e);
+  }
+}
+
+function renderCalendar(days) {
+  const grid = document.getElementById('calendarGrid');
+  if(!grid) return;
+  
+  const firstDay = new Date(currentYear, currentMonth, 1);
+  const lastDay = new Date(currentYear, currentMonth + 1, 0);
+  const startDayOfWeek = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = lastDay.getDate();
+  
+  const headers = ['Pn','Wt','Śr','Cz','Pt','So','Nd'];
+  let html = '<div class="calendar">';
+  headers.forEach(day => {
+    html += `<div class="cal-header">${day}</div>`;
+  });
+  
+  for (let i = 0; i < startDayOfWeek; i++) {
+    html += '<div class="cal-day"></div>';
+  }
+  
+  const daysMap = {};
+  days.forEach(d => {
+    const dayNum = new Date(d.date).getDate();
+    daysMap[dayNum] = d;
+  });
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dayData = daysMap[day];
+    const hasPoems = dayData && dayData.count > 0;
+    const cls = hasPoems ? 'cal-day has-poems' : 'cal-day';
+    const title = hasPoems ? `${dayData.count} wierszy: ${dayData.titles.join(', ')}` : '';
+    
+    html += `<div class="${cls}" title="${title}" onclick="calendarDayClick(${day})">
+      <div>${day}</div>`;
+    if (hasPoems) html += `<div class="cal-count">${dayData.count}</div>`;
+    html += '</div>';
+  }
+  
+  html += '</div>';
+  grid.innerHTML = html;
+}
+
+window.calendarDayClick = function(day) {
+  // Możesz dodać funkcjonalność pokazywania wierszy z danego dnia
+  console.log('Clicked day:', day);
+}
+
+function initKalendarz() {
+  loadCalendar();
+}
+</script>
+</body>
+</html>
